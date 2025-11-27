@@ -1,12 +1,9 @@
 import simpleGit from "simple-git";
 
-export async function pushToUserRepo(localDir: string, authUrl: string): Promise<{ pushSuccess: boolean }> {
+export async function pushToUserRepo(authUrl: string): Promise<{ pushSuccess: boolean }> {
     try {
-        const git = simpleGit({ baseDir: localDir });
+        const git = simpleGit();
 
-        await git.cwd(localDir);
-
-        // Ensure remote origin points to user's repo
         const remotes = await git.getRemotes(true);
         if (remotes.find((r) => r.name === "origin")) {
             await git.remote(["set-url", "origin", authUrl]);
@@ -14,29 +11,12 @@ export async function pushToUserRepo(localDir: string, authUrl: string): Promise
             await git.addRemote("origin", authUrl);
         }
 
-        // Fetch remote branches from the template repo
-        await git.fetch(["--all"]);
+        // This tells GitHub to treat `main` as the default branch (uses the first pushed branch)
+        await git.checkout("main");
+        await git.push(["-u", "origin", "main"]);
 
-        // Create local branches for each remote branch
-        const remoteBranches = (await git.branch(["-r"])).all;
-
-        for (const remote of remoteBranches) {
-            if (!remote.startsWith("origin/")) continue;
-            if (remote === "origin/HEAD") continue;
-
-            const branchName = remote.replace("origin/", "");
-
-            const localBranches = (await git.branchLocal()).all;
-
-            if (localBranches.includes(branchName)) {
-                await git.checkout(branchName);
-            } else {
-                await git.checkoutBranch(branchName, remote);
-            }
-        }
-
-        // Push every branch
-        await git.push(["--all", "origin"]);
+        // TODO remove the --force once testing is complete
+        await git.push(["--all", "origin", "--force"]);
 
         return { pushSuccess: true };
     } catch (err: any) {
@@ -46,7 +26,7 @@ export async function pushToUserRepo(localDir: string, authUrl: string): Promise
             err?.stdout ??
             String(err);
 
-        console.log(`Error: ${msg}`);
+        console.log(`Error pushing repo to Github repository: ${msg}`);
         return { pushSuccess: false };
     }
 }
