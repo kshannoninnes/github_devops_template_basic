@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "check": "tsc --noEmit",
-    "build": "esbuild src/main.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/devops-git-setup.mjs --banner:js='#!/usr/bin/env node'",
-    "start": "node dist/devops-git-setup.mjs"
+    "build": "esbuild src/main.ts --bundle --platform=node --target=node20 --format=cjs --outfile=dist/devops-git-setup.cjs --banner:js='#!/usr/bin/env node'",
+    "start": "node dist/devops-git-setup.cjs"
   },
-  "type": "commonjs",
   "devDependencies": {
     "@types/node": "^24.10.1",
     "esbuild": "^0.27.0",
