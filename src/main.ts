@@ -5,11 +5,9 @@ import fs from "node:fs";
 import simpleGit, { SimpleGit } from "simple-git";
 
 async function main() {
-    // Step 1: Define constants (eg. template repo URL)
+    // Step 1: Define constants and dependencies
     const TEMPLATE_REPO_NAME = `TemplateBlogApp`;
     const TEMPLATE_REPO_URL = `https://github.com/kshannoninnes/${TEMPLATE_REPO_NAME}`;
-
-    // Step 1.5: Setup any configuration
     const git = simpleGit();
 
     // Step 2: Prompt user for git url, git username, and git token
@@ -75,6 +73,8 @@ function makeAuthUrl(repoUrl: string, token: string): { repoUrlValid: boolean; a
     try {
         const u = new URL(repoUrl);
 
+        // Dummy username to prevent base git for prompting for one
+        // Github ignores the username when using a token
         u.username = "git";
         u.password = encodeURIComponent(token);
 
@@ -249,4 +249,7 @@ function askHidden(query: string): Promise<string> {
     });
 }
 
-await main();
+main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+});
