@@ -3,13 +3,24 @@ import path from "node:path";
 
 function runCommand(cmd: string, args: string[], cwd: string): Promise<{ success: boolean }> {
     return new Promise((resolve) => {
-        const child = spawn(cmd, args, {
+        const useShell = process.platform === "win32";
+
+        // Windows complains if you use shell: true (required)
+        // and pass args to spawn as an array, so we instead use
+        // a single string to run the command instead.
+        const cmdString = cmd + ' ' + args.join(' ');
+
+        const child = spawn(cmdString, {
             cwd,
             stdio: "inherit",   // ALWAYS show output
+            shell: useShell
         });
 
         child.once("exit", (code) => resolve({ success: code === 0 }));
-        child.once("error", () => resolve({ success: false }));
+        child.once("error", (err) => {
+            console.error(`spawn error for command "${cmdString}":`, err);
+            resolve({success: false});
+        })
     });
 }
 
@@ -30,6 +41,7 @@ export async function runCreateNextApp(parentDir: string, projName: string): Pro
             "--eslint",
             "--no-tailwind",
             "--no-experimental-react",
+            "--no-git",
             "--yes",
         ],
         parentDir

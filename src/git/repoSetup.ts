@@ -36,6 +36,28 @@ async function createProject(parentDir: string, targetDir: string): Promise<{ cr
     return { createProjectSuccess: true };
 }
 
+async function createGitRepo(repoRoot: string): Promise<{ createGitRepoSuccess: boolean }> {
+    try {
+        const git = simpleGit(repoRoot);
+
+        await git.init();                 // create .git
+        await git.add(".");               // stage all files
+        await git.commit("chore: initial commit with NextJS files");
+
+        // Make sure branch is main
+        const branches = await git.branchLocal();
+        if (branches.current !== "main") {
+            await git.branch(["-M", "main"]);
+        }
+
+        return { createGitRepoSuccess: true };
+    } catch (err) {
+        console.error("Failed to initialize git repo:", err);
+        return { createGitRepoSuccess: false };
+    }
+}
+
+
 async function applyGitHistory(testHistory?: HistoryStep[]): Promise<{ applyGitHistorySuccess: boolean }>
 {
     try {
@@ -68,10 +90,10 @@ export async function createDummyRepoWithHistory(targetDir: string, testHistory?
             return { historySuccess: false };
         }
 
-        // const { createGitRepoSuccess } = await createGitRepo(repoRoot);
-        // if (!createGitRepoSuccess) {
-        //     return { historySuccess: false };
-        // }
+        const { createGitRepoSuccess } = await createGitRepo(repoRoot);
+        if (!createGitRepoSuccess) {
+            return { historySuccess: false };
+        }
 
         process.chdir(repoRoot);
 
