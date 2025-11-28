@@ -3,6 +3,7 @@ import path from "node:path";
 
 function runCommand(cmd: string, args: string[], cwd: string): Promise<{ success: boolean }> {
     return new Promise((resolve) => {
+        // Only use shell: true if we're running on windows (errors without)
         const useShell = process.platform === "win32";
 
         // Windows complains if you use shell: true (required)
