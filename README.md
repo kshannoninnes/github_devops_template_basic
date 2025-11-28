@@ -73,16 +73,47 @@ The specific sequence of git operations (branches, commits, merges) are not hard
 ```typescript
 {
     kind: "commit",
-    debugId: "add-readme",
-    branch: "main",
-    message: "docs: update readme",
-    changes: [
+        debugId: "add-readme",
+        branch: "main",
+        message: "docs: update readme",
+        changes: [
         {
             path: "README.md",
             action: "append",
             content: "\nNew content here."
         }
     ]
+},
+```
+
+**Example of creating a branch:**
+```typescript
+{
+    kind: "branch",
+    debugId: "create-feature-branch",
+    name: "feature/login",
+    from: "main"
+},
+```
+
+**Example of merging a branch:**
+```typescript
+{
+    kind: "merge",
+    debugId: "merge-login-to-main",
+    from: "feature/login",
+    into: "main",
+    message: "Merge branch 'feature/login' into main"
+},
+```
+
+**Example of rebasing a branch:**
+```typescript
+{
+    kind: "rebase",
+    debugId: "rebase-feature-on-main",
+    branch: "feature/login",
+    onto: "main"
 },
 ```
 
